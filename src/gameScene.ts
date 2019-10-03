@@ -57,7 +57,9 @@ export class GameScene extends Phaser.Scene {
 
     // checking for input
     this.input.on("pointerdown", this.jump, this);
+    this.input.keyboard.on("keyup_UP", this.jump, this);
   }
+
   // the core of the script: platform are added from the pool or created on the fly
   addPlatform(platformWidth: number, posX: number) {
     let platform: Platform;
