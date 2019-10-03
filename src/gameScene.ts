@@ -29,8 +29,8 @@ export class GameScene extends Phaser.Scene {
   init(/*params: any*/): void {}
 
   preload(): void {
-    this.load.image("platform", "platform.png");
-    this.load.image("player", "player.png");
+    this.load.image("platform", "assets/platform.png");
+    this.load.image("player", "assets/player.png");
   }
 
   create(): void {
@@ -59,7 +59,7 @@ export class GameScene extends Phaser.Scene {
     this.input.on("pointerdown", this.jump, this);
   }
   // the core of the script: platform are added from the pool or created on the fly
-  addPlatform(platformWidth, posX) {
+  addPlatform(platformWidth: number, posX: number) {
     let platform: Platform;
     if (this.platformPool.getLength()) {
       platform = this.platformPool.getFirst();
