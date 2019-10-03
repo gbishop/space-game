@@ -4,9 +4,10 @@ import { GameScene } from "./gameScene";
 import { ScoreScene } from "./scoreScene";
 
 const config: GameConfig = {
-  title: "Starfall",
-  width: 800,
-  height: 600,
+  title: "Runner",
+  type: Phaser.AUTO,
+  width: 1334,
+  height: 750,
   parent: "game",
   scene: [WelcomeScene, GameScene, ScoreScene],
   physics: {
@@ -15,14 +16,14 @@ const config: GameConfig = {
       debug: false
     }
   },
-  backgroundColor: "#18216D"
+  backgroundColor: "#444444"
 };
 
 export class StarfallGame extends Phaser.Game {
   constructor(config: GameConfig) {
     super(config);
   }
-};
+}
 
 window.onload = () => {
   var game = new StarfallGame(config);

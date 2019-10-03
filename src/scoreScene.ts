@@ -12,7 +12,7 @@ export class ScoreScene extends Phaser.Scene {
   }
 
   init(params: any): void {
-    this.score = params.starsCaught;
+    this.score = params.score;
   }
 
   create(): void {
@@ -25,7 +25,7 @@ export class ScoreScene extends Phaser.Scene {
       { font: '24px Arial Bold', fill: '#FBFBAC' });
 
     this.input.on('pointerdown', function (/*pointer*/) {
-      this.scene.start("WelcomeScene");
+      this.scene.start("GameScene");
     }, this);
   }
 };

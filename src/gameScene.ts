@@ -1,12 +1,24 @@
 import "phaser";
 
+// global game options
+let gameOptions = {
+  platformStartSpeed: 350,
+  spawnRange: [100, 350],
+  platformSizeRange: [50, 250],
+  playerGravity: 900,
+  jumpForce: 400,
+  playerStartPosition: 200,
+  jumps: 2
+};
+
+type Platform = Phaser.Physics.Arcade.Sprite;
+
 export class GameScene extends Phaser.Scene {
-  delta: number;
-  lastStarTime: number;
-  starsCaught: number;
-  starsFallen: number;
-  sand: Phaser.Physics.Arcade.StaticGroup;
-  info: Phaser.GameObjects.Text;
+  platformGroup: Phaser.GameObjects.Group;
+  platformPool: Phaser.GameObjects.Group;
+  player: Phaser.Physics.Arcade.Sprite;
+  playerJumps = 0;
+  nextPlatformDistance = 0;
 
   constructor() {
     super({
@@ -14,82 +26,106 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  init(/*params: any*/): void {
-    this.delta = 1000;
-    this.lastStarTime = 0;
-    this.starsCaught = 0;
-    this.starsFallen = 0;
-  }
+  init(/*params: any*/): void {}
 
   preload(): void {
-    this.load.setBaseURL("https://raw.githubusercontent.com/mariyadavydova/" +
-      "starfall-phaser3-typescript/master/");
-    this.load.image("star", "assets/star.png");
-    this.load.image("sand", "assets/sand.jpg");
+    this.load.image("platform", "platform.png");
+    this.load.image("player", "player.png");
   }
 
   create(): void {
-    this.sand = this.physics.add.staticGroup({
-      key: 'sand',
-      frameQuantity: 20
+    this.platformGroup = this.add.group({
+      removeCallback: platform => this.platformPool.add(platform)
     });
-    Phaser.Actions.PlaceOnLine(this.sand.getChildren(),
-      new Phaser.Geom.Line(20, 580, 820, 580));
-    this.sand.refresh();
+    this.platformPool = this.add.group({
+      removeCallback: platform => this.platformGroup.add(platform)
+    });
 
-    this.info = this.add.text(10, 10, '',
-      { font: '24px Arial Bold', fill: '#FBFBAC' });
+    // adding a platform to the game, the arguments are platform width and x position
+    this.addPlatform(+this.game.config.width, +this.game.config.width / 2);
+
+    // adding the player;
+    this.player = this.physics.add.sprite(
+      gameOptions.playerStartPosition,
+      +this.game.config.height / 2,
+      "player"
+    );
+    this.player.setGravityY(gameOptions.playerGravity);
+
+    // setting collisions between the player and the platform group
+    this.physics.add.collider(this.player, this.platformGroup);
+
+    // checking for input
+    this.input.on("pointerdown", this.jump, this);
+  }
+  // the core of the script: platform are added from the pool or created on the fly
+  addPlatform(platformWidth, posX) {
+    let platform: Platform;
+    if (this.platformPool.getLength()) {
+      platform = this.platformPool.getFirst();
+      platform.x = posX;
+      platform.active = true;
+      platform.visible = true;
+      this.platformPool.remove(platform);
+    } else {
+      platform = this.physics.add.sprite(
+        posX,
+        +this.game.config.height * 0.8,
+        "platform"
+      );
+      platform.setImmovable(true);
+      platform.setVelocityX(gameOptions.platformStartSpeed * -1);
+      this.platformGroup.add(platform);
+    }
+    platform.displayWidth = platformWidth;
+    this.nextPlatformDistance = Phaser.Math.Between(
+      gameOptions.spawnRange[0],
+      gameOptions.spawnRange[1]
+    );
   }
 
-  update(time: number): void {
-    var diff: number = time - this.lastStarTime;
-    if (diff > this.delta) {
-      this.lastStarTime = time;
-      if (this.delta > 500) {
-        this.delta -= 20;
+  // the player jumps when on the ground, or once in the air as long as there are jumps left and the first jump was on the ground
+  jump() {
+    if (
+      this.player.body.touching.down ||
+      (this.playerJumps > 0 && this.playerJumps < gameOptions.jumps)
+    ) {
+      if (this.player.body.touching.down) {
+        this.playerJumps = 0;
       }
-      this.emitStar();
-    }
-    this.info.text =
-      this.starsCaught + " caught - " +
-      this.starsFallen + " fallen (max 3)";
-  }
-
-  private onClick(star: Phaser.Physics.Arcade.Image): () => void {
-    return function () {
-      star.setTint(0x00ff00);
-      star.setVelocity(0, 0);
-      this.starsCaught += 1;
-      this.time.delayedCall(100, function (star) {
-        star.destroy();
-      }, [star], this);
+      this.player.setVelocityY(gameOptions.jumpForce * -1);
+      this.playerJumps++;
     }
   }
+  update() {
+    // game over
+    if (this.player.y > this.game.config.height) {
+      this.scene.start("ScoreScene", { score: this.playerJumps });
+    }
+    this.player.x = gameOptions.playerStartPosition;
 
-  private onFall(star: Phaser.Physics.Arcade.Image): () => void {
-    return function () {
-      star.setTint(0xff0000);
-      this.starsFallen += 1;
-      this.time.delayedCall(100, function (star) {
-        star.destroy();
-        if (this.starsFallen > 2) {
-          this.scene.start("ScoreScene", { starsCaught: this.starsCaught });
-        }
-      }, [star], this);
+    // recycling platforms
+    let minDistance = +this.game.config.width;
+    this.platformGroup.getChildren().forEach(function(platform: Platform) {
+      let platformDistance =
+        +this.game.config.width - platform.x - platform.displayWidth / 2;
+      minDistance = Math.min(minDistance, platformDistance);
+      if (platform.x < -platform.displayWidth / 2) {
+        this.platformGroup.killAndHide(platform);
+        this.platformGroup.remove(platform);
+      }
+    }, this);
+
+    // adding new platforms
+    if (minDistance > this.nextPlatformDistance) {
+      var nextPlatformWidth = Phaser.Math.Between(
+        gameOptions.platformSizeRange[0],
+        gameOptions.platformSizeRange[1]
+      );
+      this.addPlatform(
+        nextPlatformWidth,
+        +this.game.config.width + nextPlatformWidth / 2
+      );
     }
   }
-
-  private emitStar(): void {
-    var star: Phaser.Physics.Arcade.Image;
-    var x = Phaser.Math.Between(25, 775);
-    var y = 26;
-    star = this.physics.add.image(x, y, "star");
-
-    star.setDisplaySize(50, 50);
-    star.setVelocity(0, 200);
-    star.setInteractive();
-
-    star.on('pointerdown', this.onClick(star), this);
-    this.physics.add.collider(star, this.sand, this.onFall(star), null, this);
-  }
-};
+}
