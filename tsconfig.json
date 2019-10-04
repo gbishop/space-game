@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2019",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "moduleResolution": "Node"
   },
   "include": ["src/*"]
 }
