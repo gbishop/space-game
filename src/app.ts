@@ -3,7 +3,7 @@ import { WelcomeScene } from "./welcomeScene";
 import { GameScene } from "./gameScene";
 import { ScoreScene } from "./scoreScene";
 
-const config: GameConfig = {
+const config: Phaser.Types.Core.GameConfig = {
   title: "Runner",
   type: Phaser.AUTO,
   width: 1334,
@@ -20,7 +20,7 @@ const config: GameConfig = {
 };
 
 export class StarfallGame extends Phaser.Game {
-  constructor(config: GameConfig) {
+  constructor(config: Phaser.Types.Core.GameConfig) {
     super(config);
   }
 }
