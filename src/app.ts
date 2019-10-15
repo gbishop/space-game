@@ -8,6 +8,10 @@ const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 1334,
   height: 750,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+  },
   parent: "game",
   scene: [WelcomeScene, GameScene, ScoreScene],
   physics: {
