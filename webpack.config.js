@@ -5,21 +5,37 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.ts$/,
         use: "ts-loader",
         exclude: /node_modules/
       }
     ]
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js"]
+    extensions: [".ts", ".js"]
   },
   output: {
     filename: "app.js",
     path: path.resolve(__dirname, "dist")
   },
-  mode: "development",
   externals: {
     phaser: "Phaser"
-  }
+  },
+  devServer: {
+    publicPath: "/dist/",
+    contentBase: path.resolve(__dirname, "."),
+    watchContentBase: true,
+    watchOptions: {
+      ignored: /\.sw.$/
+    },
+    overlay: true,
+    stats: {
+      assets: false,
+      hash: false,
+      chunks: false,
+      errors: true,
+      errorDetails: true
+    }
+  },
+  devtool: "eval-source-map"
 };
