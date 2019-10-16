@@ -4,7 +4,7 @@
   "description": "Runner game (Phaser 3 + TypeScript)",
   "main": "webpack.config.js",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode production",
     "start": "webpack-dev-server --mode development --hot"
   },
   "author": "Gary Bishop after Mariya Davydova",
