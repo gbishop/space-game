@@ -27,9 +27,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.image("alien", "../assets/alien.png");
-    this.load.image("rocket", "../assets/rocket.png");
-    this.load.image("particle", "../assets/particle.png");
+    this.load.image("alien", "assets/alien.png");
+    this.load.image("rocket", "assets/rocket.png");
+    this.load.image("particle", "assets/particle.png");
   }
 
   create(): void {
