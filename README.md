@@ -1,6 +1,6 @@
-# base
+# space-game
 
-A base to start phaser projects.
+A simple switch-accessible game concept
 
 Based on
 [Starfall](https://github.com/mariyadavydova/starfall-phaser3-typescript).
