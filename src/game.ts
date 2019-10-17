@@ -5,6 +5,12 @@ let gameOptions = {};
 
 const rocket_y = 450;
 
+interface InputConfig {
+  caller: string; // scene requesting input
+  choices: string[]; // labels for choices
+  correct: number; // index of the correct choice
+}
+
 export class GameScene extends Phaser.Scene {
   public msg: Phaser.GameObjects.Text;
   public elapsed: number = 0;
@@ -19,6 +25,8 @@ export class GameScene extends Phaser.Scene {
   public rocket_lane = 1;
   public sign = 1;
   public freq = 1.5;
+
+  public inputConfig: InputConfig;
 
   constructor() {
     super({
@@ -63,12 +71,16 @@ export class GameScene extends Phaser.Scene {
     });
     this.reset();
 
-    this.input.keyboard.on("keydown-P", (e: any) => {
-      this.scene.pause();
-      this.scene.resume("ControlScene"); // should be run
+    // input comes back from controller here
+    this.events.on("resume", (s: Phaser.Scene, d: { choice: number }) => {
+      this.rocket_lane = d.choice;
     });
-    // workaround run bug
-    this.scene.run("ControlScene", this);
+
+    /* There is a bug in run, now fixed but not yet released that makes
+     * it recreate instead of restarting a paused scene. I'll work around
+     * that by always resuming but I'll first need to run to get it started.
+     * I'll remove this when run gets released */
+    this.scene.run("ControlScene", this.inputConfig);
     this.scene.pause("ControlScene");
   }
 
@@ -80,6 +92,12 @@ export class GameScene extends Phaser.Scene {
     this.freq = 0.5 + Math.random() * 2;
     this.rocket.x = w / 4 + (w / 2) * this.rocket_lane;
     this.alien.setVisible(true);
+
+    this.inputConfig = {
+      caller: "GameScene",
+      choices: ["left", "right"],
+      correct: this.lane
+    };
   }
 
   update(time: number, delta: number) {
@@ -94,8 +112,7 @@ export class GameScene extends Phaser.Scene {
     // pause when we pass the decision time
     const decision_time = this.period * 0.5;
     if (this.previous < decision_time && this.elapsed >= decision_time) {
-      this.scene.resume("ControlScene"); // should be run
-      this.scene.pause();
+      this.scene.resume("ControlScene", this.inputConfig); // should be run
     }
     const u = this.elapsed / this.period;
     const goal_x = w / 4 + (this.lane * w) / 2;
@@ -119,28 +136,39 @@ export class GameScene extends Phaser.Scene {
 }
 
 export class ControlScene extends Phaser.Scene {
-  public other: GameScene;
+  public inputConfig: InputConfig;
   constructor() {
     super({
       key: "ControlScene"
     });
   }
 
-  init(other: GameScene) {
-    this.other = other;
+  handleInput(inputConfig: InputConfig) {
+    // request for input from another scene
+    this.inputConfig = inputConfig;
+    // pause the caller until we have a response for them
+    this.scene.pause(this.inputConfig.caller);
+  }
+
+  init(inputConfig: InputConfig) {
+    // not sure I need this, perhaps ignore?
+    this.inputConfig = inputConfig;
   }
 
   create(): void {
     console.log("create control");
     this.input.keyboard.on("keydown-LEFT", (e: any) => {
-      this.other.rocket_lane = 0;
-      this.scene.resume("GameScene");
+      // pass response back to caller
+      this.scene.resume(this.inputConfig.caller, { choice: 0 });
       this.scene.pause();
     });
     this.input.keyboard.on("keydown-RIGHT", (e: any) => {
-      this.other.rocket_lane = 1;
-      this.scene.resume("GameScene");
+      // pass response back to caller
+      this.scene.resume(this.inputConfig.caller, { choice: 1 });
       this.scene.pause();
     });
+    this.events.on("resume", (e: Phaser.Scene, d: InputConfig) =>
+      this.handleInput(d)
+    );
   }
 }
