@@ -1,5 +1,6 @@
 import "phaser";
-import { GameScene, ControlScene } from "./game";
+import { ControlScene } from "./base";
+import { GameScene } from "./game";
 
 const config: Phaser.Types.Core.GameConfig = {
   title: "Runner",
