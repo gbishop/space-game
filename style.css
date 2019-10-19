@@ -30,8 +30,8 @@ button {
   font-size: 8em;
 }
 
-svg {
-  width: 100%;
+canvas {
+  height: var(--available-height);
 }
 
 button.selected {
