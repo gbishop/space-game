@@ -16,6 +16,9 @@ export class GameScene extends SwitchBase {
   public rocket_y = 0;
   public sign = 1;
   public freq = 1.5;
+  public score: number = 0;
+  public scoreDisplay: Phaser.GameObjects.Text;
+  public collider: Phaser.Physics.Arcade.Collider;
 
   constructor() {
     super({
@@ -31,6 +34,7 @@ export class GameScene extends SwitchBase {
 
   create(): void {
     console.log("create game");
+    this.scoreDisplay = this.add.text(20, 20, "0");
     this.rocket_y = this.canvas.height * 0.9;
     this.alien = this.add.sprite(this.canvas.width / 2, 10, "alien");
     this.rocket = this.add.sprite(
@@ -40,7 +44,7 @@ export class GameScene extends SwitchBase {
     );
     // Enable physics on rocket and alien sprites
     this.physics.world.enable([this.rocket, this.alien]);
-    this.physics.add.overlap(
+    this.collider = this.physics.add.overlap(
       this.rocket,
       this.alien,
       this.rocketCollideWithAlien,
@@ -70,6 +74,7 @@ export class GameScene extends SwitchBase {
     this.freq = 0.5 + Math.random() * 2;
     this.rocket.x = w / 4 + (w / 2) * this.rocket_lane;
     this.alien.setVisible(true);
+    this.collider.active = true;
   }
 
   update(time: number, delta: number) {
@@ -105,8 +110,13 @@ export class GameScene extends SwitchBase {
     // flash
     this.cameras.main.flash();
     // Hide the alien
-    this.alien.setVisible(false);
+    this.alien.visible = false;
+    // prevent multiple collisions
+    this.collider.active = false;
     // blowup
     this.particles.emitParticleAt(this.alien.x, this.alien.y);
+    // update score
+    this.score += 1;
+    this.scoreDisplay.setText("" + this.score);
   }
 }
