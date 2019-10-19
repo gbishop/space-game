@@ -1,11 +1,7 @@
 import "phaser";
+import { SwitchBase } from "./base";
 
-// global game options
-let gameOptions = {};
-
-const rocket_y = 450;
-
-export class GameScene extends Phaser.Scene {
+export class GameScene extends SwitchBase {
   public msg: Phaser.GameObjects.Text;
   public elapsed: number = 0;
   public previous: number = 0; // previous elapsed
@@ -17,6 +13,7 @@ export class GameScene extends Phaser.Scene {
   public canvas = document.querySelector("canvas");
   public lane = 0;
   public rocket_lane = 1;
+  public rocket_y = 0;
   public sign = 1;
   public freq = 1.5;
 
@@ -34,10 +31,11 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     console.log("create game");
+    this.rocket_y = this.canvas.height * 0.9;
     this.alien = this.add.sprite(this.canvas.width / 2, 10, "alien");
     this.rocket = this.add.sprite(
       (3 * this.canvas.width) / 4,
-      rocket_y,
+      this.rocket_y,
       "rocket"
     );
     // Enable physics on rocket and alien sprites
@@ -62,14 +60,6 @@ export class GameScene extends Phaser.Scene {
       on: false
     });
     this.reset();
-
-    this.input.keyboard.on("keydown-P", (e: any) => {
-      this.scene.pause();
-      this.scene.resume("ControlScene"); // should be run
-    });
-    // workaround run bug
-    this.scene.run("ControlScene", this);
-    this.scene.pause("ControlScene");
   }
 
   reset() {
@@ -94,14 +84,17 @@ export class GameScene extends Phaser.Scene {
     // pause when we pass the decision time
     const decision_time = this.period * 0.5;
     if (this.previous < decision_time && this.elapsed >= decision_time) {
-      this.scene.resume("ControlScene"); // should be run
-      this.scene.pause();
+      this.getUserInput(
+        ["left", "right"],
+        this.lane,
+        (v: number) => (this.rocket_lane = v)
+      );
     }
     const u = this.elapsed / this.period;
     const goal_x = w / 4 + (this.lane * w) / 2;
     const wiggle =
       (w / 2) * (1 + this.sign * Math.sin(2 * Math.PI * this.freq * u));
-    const v = Math.min(1, (h / rocket_y) * u);
+    const v = Math.min(1, (h / this.rocket_y) * u);
     this.alien.x = (1 - v) * wiggle + v * goal_x;
     this.alien.y = this.canvas.height * u;
     const rocket_x = w / 4 + (this.rocket_lane * w) / 2;
@@ -109,38 +102,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   rocketCollideWithAlien() {
+    // flash
+    this.cameras.main.flash();
     // Hide the alien
     this.alien.setVisible(false);
-
+    // blowup
     this.particles.emitParticleAt(this.alien.x, this.alien.y);
-
-    this.cameras.main.flash();
-  }
-}
-
-export class ControlScene extends Phaser.Scene {
-  public other: GameScene;
-  constructor() {
-    super({
-      key: "ControlScene"
-    });
-  }
-
-  init(other: GameScene) {
-    this.other = other;
-  }
-
-  create(): void {
-    console.log("create control");
-    this.input.keyboard.on("keydown-LEFT", (e: any) => {
-      this.other.rocket_lane = 0;
-      this.scene.resume("GameScene");
-      this.scene.pause();
-    });
-    this.input.keyboard.on("keydown-RIGHT", (e: any) => {
-      this.other.rocket_lane = 1;
-      this.scene.resume("GameScene");
-      this.scene.pause();
-    });
   }
 }
