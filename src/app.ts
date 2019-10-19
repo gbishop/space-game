@@ -5,12 +5,13 @@ import { GameScene } from "./game";
 const config: Phaser.Types.Core.GameConfig = {
   title: "Runner",
   type: Phaser.AUTO,
-  width: 512,
-  height: 512,
+  width: 600,
+  height: 800,
+  /*
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
-  },
+  }, */
   parent: "game",
   scene: [GameScene, ControlScene],
   physics: {

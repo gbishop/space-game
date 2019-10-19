@@ -66,5 +66,29 @@ export class ControlScene extends Phaser.Scene {
       this.inputConfig = d;
       this.scene.pause(d.caller);
     });
+    document
+      .getElementById("left")
+      .addEventListener("click", e => this.returnInput(0));
+    document
+      .getElementById("right")
+      .addEventListener("click", e => this.returnInput(1));
+    this.input.keyboard.on("keydown-SPACE", (e: any) => {
+      const choices = document.querySelectorAll("button.choice");
+      let selected = document.querySelector("button.selected");
+      let i = 0;
+      if (selected) {
+        i = ([...choices].indexOf(selected) + 1) % choices.length;
+        selected.classList.remove("selected");
+      }
+      choices[i].classList.add("selected");
+    });
+    this.input.keyboard.on("keydown-ENTER", (e: any) => {
+      const selected = <HTMLButtonElement>(
+        document.querySelector("button.selected")
+      );
+      if (selected) {
+        selected.click();
+      }
+    });
   }
 }
