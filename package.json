@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "start": "webpack-dev-server --mode development --hot",
-    "pages": "git checkout gh-pages; git merge master; npm run build; git add dist/app.js; git commit -m 'update js'; git push origin gh-pages; git checkout master"
+    "pages": "git checkout gh-pages; git merge --no-commit master; npm run build; git add dist/app.js; git commit -m 'update pages'; git push origin gh-pages; git checkout master"
   },
   "author": "Gary Bishop after Mariya Davydova",
   "license": "MIT",
