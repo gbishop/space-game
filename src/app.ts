@@ -12,7 +12,7 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   }, */
-  parent: "game",
+  parent: "play",
   scene: [GameScene, ControlScene],
   physics: {
     default: "arcade",
@@ -30,5 +30,8 @@ export class MyGame extends Phaser.Game {
 }
 
 window.onload = () => {
+  document
+    .getElementById("setup")
+    .addEventListener("click", () => (location.pathname = "settings.html"));
   var game = new MyGame(config);
 };
