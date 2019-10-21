@@ -23,17 +23,31 @@ body {
   font-size: calc(16px + (64 - 16) * ((100vmin - 800px) / (1980 - 800)));
 }
 
-button {
+button.choice {
   text-align: center;
   justify-content: center;
   align-items: center;
-  font-size: 8em;
+  font-size: 10vw;
 }
 
 canvas {
   height: var(--available-height);
+  width: 60vw;
 }
 
 button.selected {
   background-color: pink;
+}
+
+button#setup {
+  position: absolute;
+  top: 10;
+  left: 10;
+  background-color: black;
+  border-radius: 5px;
+}
+
+#setup img {
+  width: 20px;
+  height: 20px;
 }

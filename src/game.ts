@@ -30,6 +30,7 @@ export class GameScene extends SwitchBase {
     this.load.image("alien", "assets/alien.png");
     this.load.image("rocket", "assets/rocket.png");
     this.load.image("particle", "assets/particle.png");
+    this.load.audio("pop", "assets/pop.wav");
   }
 
   create(): void {
@@ -64,6 +65,8 @@ export class GameScene extends SwitchBase {
       on: false
     });
     this.reset();
+
+    this.sound.add("pop");
   }
 
   reset() {
@@ -98,7 +101,9 @@ export class GameScene extends SwitchBase {
     const u = this.elapsed / this.period;
     const goal_x = w / 4 + (this.lane * w) / 2;
     const wiggle =
-      (w / 2) * (1 + this.sign * Math.sin(2 * Math.PI * this.freq * u));
+      w / 2 +
+      ((Math.min(10, this.score) * w) / 20) *
+        (this.sign * Math.sin(2 * Math.PI * this.freq * u));
     const v = Math.min(1, (h / this.rocket_y) * u);
     this.alien.x = (1 - v) * wiggle + v * goal_x;
     this.alien.y = this.canvas.height * u;
@@ -107,6 +112,7 @@ export class GameScene extends SwitchBase {
   }
 
   rocketCollideWithAlien() {
+    this.sound.play("pop");
     // flash
     this.cameras.main.flash();
     // Hide the alien

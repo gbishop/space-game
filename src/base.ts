@@ -1,4 +1,5 @@
 import "phaser";
+import settings from "./settings";
 
 interface InputConfig {
   caller: string;
@@ -48,8 +49,20 @@ export class ControlScene extends Phaser.Scene {
   }
 
   returnInput(value: number) {
+    if (settings.mode == "one") {
+      value = this.inputConfig.correct;
+    }
     this.scene.resume(this.inputConfig.caller, { choice: value });
     this.scene.pause();
+  }
+
+  setSelected(choice: number) {
+    const choices = document.querySelectorAll("button.choice");
+    let selected = document.querySelector("button.selected");
+    if (selected) {
+      selected.classList.remove("selected");
+    }
+    choices[choice].classList.add("selected");
   }
 
   create(): void {
@@ -65,6 +78,17 @@ export class ControlScene extends Phaser.Scene {
     this.events.on("resume", (e: Phaser.Scene, d: InputConfig) => {
       this.inputConfig = d;
       this.scene.pause(d.caller);
+      if (settings.mode == "auto") {
+        this.time.delayedCall(
+          1000,
+          () => {
+            this.setSelected(this.inputConfig.correct);
+            this.returnInput(this.inputConfig.correct);
+          },
+          [],
+          this
+        );
+      }
     });
     document
       .getElementById("left")
