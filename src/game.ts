@@ -19,6 +19,8 @@ export class GameScene extends SwitchBase {
   public score: number = 0;
   public scoreDisplay: Phaser.GameObjects.Text;
   public collider: Phaser.Physics.Arcade.Collider;
+  public popSound: Phaser.Sound.WebAudioSound;
+  public alienSound: Phaser.Sound.WebAudioSound;
 
   constructor() {
     super({
@@ -31,6 +33,7 @@ export class GameScene extends SwitchBase {
     this.load.image("rocket", "assets/rocket.png");
     this.load.image("particle", "assets/particle.png");
     this.load.audio("pop", "assets/pop.wav");
+    this.load.audio("alienSound", "assets/alien.mp3");
   }
 
   create(): void {
@@ -66,7 +69,10 @@ export class GameScene extends SwitchBase {
     });
     this.reset();
 
-    this.sound.add("pop");
+    this.popSound = <Phaser.Sound.WebAudioSound>this.sound.add("pop");
+    this.alienSound = <Phaser.Sound.WebAudioSound>this.sound.add("alienSound");
+    this.alienSound.setLoop(true);
+    this.alienSound.play();
   }
 
   reset() {
@@ -78,6 +84,11 @@ export class GameScene extends SwitchBase {
     this.rocket.x = w / 4 + (w / 2) * this.rocket_lane;
     this.alien.setVisible(true);
     this.collider.active = true;
+    if (this.alienSound) {
+      this.alienSound.setSeek(0);
+      this.alienSound.setRate(this.freq);
+      this.alienSound.play();
+    }
   }
 
   update(time: number, delta: number) {
@@ -109,10 +120,17 @@ export class GameScene extends SwitchBase {
     this.alien.y = this.canvas.height * u;
     const rocket_x = w / 4 + (this.rocket_lane * w) / 2;
     this.rocket.x -= (this.rocket.x - rocket_x) / 10;
+
+    this.alienSound.setVolume(u);
+
+    if (u % 0.2 < 1 / 60) {
+      this.alien.setTint(0xffffff * Math.random());
+    }
   }
 
   rocketCollideWithAlien() {
-    this.sound.play("pop");
+    // this.sound.play("pop");
+    this.popSound.play();
     // flash
     this.cameras.main.flash();
     // Hide the alien
