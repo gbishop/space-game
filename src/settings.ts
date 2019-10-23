@@ -1,11 +1,18 @@
-const key = 'space-config';
-const version = 1;
+const key = "space-config";
+const version = 2;
 
 class Settings {
-  public mode: string = 'auto';
+  public mode: string = "auto";
+  public sound: boolean = true;
+  public asteroids: boolean = true;
 
   public persist() {
-    const data = { mode: this.mode, version: version };
+    const data = {
+      version: version,
+      mode: this.mode,
+      sound: this.sound,
+      asteroids: this.asteroids
+    };
     const json = JSON.stringify(data);
     localStorage.setItem(key, json);
   }
@@ -16,6 +23,8 @@ class Settings {
       const data = JSON.parse(json);
       if (data.version == version) {
         this.mode = data.mode;
+        this.sound = data.sound;
+        this.asteroids = data.asteroids;
       }
     }
   }

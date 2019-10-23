@@ -1,9 +1,10 @@
 import "phaser";
 import { ControlScene } from "./base";
 import { GameScene } from "./game";
+import { IntroScene } from "./intro";
 
 const config: Phaser.Types.Core.GameConfig = {
-  title: "Runner",
+  title: "Space",
   type: Phaser.AUTO,
   width: 600,
   height: 800,
@@ -13,7 +14,7 @@ const config: Phaser.Types.Core.GameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH
   }, */
   parent: "play",
-  scene: [GameScene, ControlScene],
+  scene: [IntroScene, GameScene, ControlScene],
   physics: {
     default: "arcade",
     arcade: {
