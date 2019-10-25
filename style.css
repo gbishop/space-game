@@ -30,7 +30,8 @@ button.choice {
   font-size: 10vw;
 }
 
-canvas {
+div#play {
+  flex: 3;
   height: var(--available-height);
   width: 60vw;
 }
