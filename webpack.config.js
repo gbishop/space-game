@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  entry: { app: "./src/app.ts", settingsui: "./src/settingsui.ts" },
+  entry: { app: "./src/app.ts" },
   module: {
     rules: [
       {

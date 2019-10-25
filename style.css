@@ -30,7 +30,7 @@ button.choice {
   font-size: 10vw;
 }
 
-div#play {
+div#game {
   flex: 3;
   height: var(--available-height);
   width: 60vw;
@@ -51,4 +51,18 @@ button#setup {
 #setup img {
   width: 20px;
   height: 20px;
+}
+
+body.settings div#play {
+  display: none;
+}
+
+body.play div#settings {
+  display: none;
+}
+
+body.settings div#settings {
+  background-color: white;
+  color: black;
+  padding: 10px;
 }
