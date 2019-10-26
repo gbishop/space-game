@@ -15,7 +15,7 @@ export class SwitchBase extends Phaser.Scene {
     super(args);
   }
 
-  getUserInput(choices: string[], correct: number, func: (v: number) => void) {
+  getUserInput(correct: number, func: (v: number) => void) {
     if (!this.initialized) {
       this.events.on("resume", (s: Phaser.Scene, d: { choice: number }) =>
         this.userInput(d.choice)
@@ -28,7 +28,7 @@ export class SwitchBase extends Phaser.Scene {
       this.scene.pause("ControlScene");
       this.initialized = true;
     }
-    let inputConfig = { caller: this.scene.key, choices, correct };
+    let inputConfig = { caller: this.scene.key, correct };
     this.scene.resume("ControlScene", inputConfig);
     this.scene.pause();
     this.callback = func;

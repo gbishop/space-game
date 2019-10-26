@@ -6,10 +6,62 @@
     <script src="dist/app.js"></script>
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
-  <body class="row">
-    <button id="setup" title="settings"><img src="assets/gear.png" /></button>
-    <button id="left" class="col choice">&larr;</button>
-    <div id="play" class="col"></div>
-    <button id="right" class="col choice">&rarr;</button>
+  <body class="settings">
+    <div id="play" class="row">
+      <button id="setup" title="settings"><img src="assets/gear.png" /></button>
+      <button id="left" class="col choice">&larr;</button>
+      <div id="game" class="col"></div>
+      <button id="right" class="col choice">&rarr;</button>
+    </div>
+    <div id="settings">
+      <h1>Space defense</h1>
+      <p>
+        Stop the tricky alien by blocking him with the rocket but watch out for
+        those asteroids.
+      </p>
+      <p>Select a game play mode:</p>
+      <div>
+        <input type="radio" id="auto" name="mode" value="auto" checked />
+        <label for="auto"
+          >Automatic play will demonstrate how gameplay works.</label
+        >
+      </div>
+      <div>
+        <input type="radio" id="one" name="mode" value="one" />
+        <label for="one"
+          >One-switch no fail mode has the computer make the correct choice but
+          has the player press their button to continue.</label
+        >
+      </div>
+      <div>
+        <input type="radio" id="full" name="mode" value="full" />
+        <label for="full"
+          >Full play mode has the player making the choices.</label
+        >
+      </div>
+
+      <p>
+        The player controls the rocket directly using the buttons or left/right
+        arrow keys, or 2-switch mover/chooser access using Space and Enter.
+      </p>
+
+      <div>
+        <input type="checkbox" id="sound" />
+        <label for="sound">Enable sound</label>
+      </div>
+
+      <div>
+        <input type="checkbox" id="asteroids" />
+        <label for="asteroids"
+          >Include occasional asteroids which must be avoided</label
+        >
+      </div>
+
+      <p>
+        Use the gear icon in the upper right to come back here from the game
+      </p>
+
+      <button id="playButton">Play</button>
+    </div>
   </body>
 </html>
