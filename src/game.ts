@@ -15,10 +15,7 @@ export class GameScene extends SwitchBase {
   public particles: Phaser.GameObjects.Particles.ParticleEmitterManager;
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
   public canvas = document.querySelector("canvas");
-  public lane = 0;
   public rocket_y = 0;
-  public sign = 1;
-  public freq = 1.5;
   public score: number = 0;
   public scoreDisplay: Phaser.GameObjects.Text;
   public collider: Phaser.Physics.Arcade.Collider;
@@ -150,17 +147,17 @@ export class GameScene extends SwitchBase {
 
   reset() {
     const w = this.canvas.width;
-    this.lane = Phaser.Math.Between(0, 1);
-    this.sign = 2 * Phaser.Math.Between(0, 1) - 1;
-    this.freq = 0.5 + Math.random() * 2;
+    const lane = Phaser.Math.Between(0, 1);
+    const sign = 2 * Phaser.Math.Between(0, 1) - 1;
+    const freq = 0.5 + Math.random() * 2;
     if (this.score < 20 || Math.random() > 0.2) {
       this.target = this.alien;
-      let name = `ship${Phaser.Math.Between(0, 9)}`;
+      const name = `ship${Phaser.Math.Between(0, 9)}`;
       this.alien.anims.play(name);
       this.asteroid.y = -100;
       if (this.alienSound) {
         this.alienSound.setSeek(0);
-        this.alienSound.setRate(this.freq);
+        this.alienSound.setRate(freq);
         this.alienSound.play();
       }
     } else {
@@ -178,13 +175,13 @@ export class GameScene extends SwitchBase {
         target: Phaser.GameObjects.Sprite
       ) => {
         const u = target.y / this.canvas.height;
-        const goal_x = this.canvas.width * (1 / 4 + this.lane / 2);
+        const goal_x = this.canvas.width * (1 / 4 + lane / 2);
         const wiggle =
           this.canvas.width *
           (1 / 2 +
             (Math.min(10, this.score) / 20) *
-              (this.sign * Math.sin(2 * Math.PI * this.freq * u)));
-        const v = Math.min(1, (this.canvas.height / this.rocket_y) * u);
+              (sign * Math.sin(2 * Math.PI * freq * u)));
+        const v = Math.min(1, target.y / this.rocket_y);
         target.x = (1 - v) * wiggle + v * goal_x;
         if (this.alienSound) this.alienSound.setVolume(u);
       },
@@ -198,7 +195,7 @@ export class GameScene extends SwitchBase {
       () => {
         this.attack.pause();
         this.getUserInput(
-          this.target === this.alien ? this.lane : 1 - this.lane,
+          this.target === this.alien ? lane : 1 - lane,
           (v: number) => {
             this.attack.resume();
             const rocket_x = w / 4 + (v * w) / 2;
@@ -216,23 +213,22 @@ export class GameScene extends SwitchBase {
   }
 
   rocketCollideWithAlien() {
-    // this.sound.play("pop");
     if (this.target == this.alien) {
       if (this.popSound) this.popSound.play();
       this.cameras.main.flash();
+      this.score += 1;
     } else {
       if (this.explodeSound) this.explodeSound.play();
       this.cameras.main.flash(500, 255, 0, 0);
+      this.score -= 1;
     }
-    // flash
-    // Hide the alien
+    // Hide the target
     this.target.visible = false;
     // prevent multiple collisions
     this.collider.active = false;
     // blowup
     this.particles.emitParticleAt(this.target.x, this.target.y);
-    // update score
-    this.score += this.target === this.alien ? 1 : -1;
+    // display score
     this.scoreDisplay.setText("" + this.score);
   }
 }
