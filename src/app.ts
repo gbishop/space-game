@@ -1,5 +1,4 @@
 import "phaser";
-import { ControlScene } from "./base";
 import { GameScene } from "./game";
 import settings from "./settings";
 
@@ -13,7 +12,7 @@ const config: Phaser.Types.Core.GameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   parent: "game",
-  scene: [GameScene, ControlScene],
+  scene: [GameScene],
   physics: {
     default: "arcade",
     arcade: {

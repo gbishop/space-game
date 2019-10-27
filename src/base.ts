@@ -8,52 +8,40 @@ interface InputConfig {
 }
 
 export class SwitchBase extends Phaser.Scene {
-  public initialized: boolean = false;
+  public waiting: boolean = false;
   public callback: (v: number) => void;
+  public correct: number;
 
   constructor(args: any) {
     super(args);
   }
 
   getUserInput(correct: number, func: (v: number) => void) {
-    if (!this.initialized) {
-      this.events.on("resume", (s: Phaser.Scene, d: { choice: number }) =>
-        this.userInput(d.choice)
-      );
-      /* There is a bug in run, now fixed but not yet released that makes
-       * it recreate instead of restarting a paused scene. I'll work around
-       * that by always resuming but I'll first need to run to get it started.
-       * I'll remove this when run gets released */
-      this.scene.run("ControlScene");
-      this.scene.pause("ControlScene");
-      this.initialized = true;
-    }
-    let inputConfig = { caller: this.scene.key, correct };
-    this.scene.resume("ControlScene", inputConfig);
-    this.scene.pause();
+    this.waiting = true;
+    this.correct = correct;
     this.callback = func;
-  }
-
-  userInput(choice: number) {
-    // this method will be called with the user's response
-    this.callback(choice);
-  }
-}
-
-export class ControlScene extends Phaser.Scene {
-  public inputConfig: InputConfig;
-  constructor() {
-    super({
-      key: "ControlScene"
-    });
+    if (settings.mode == "auto") {
+      this.time.delayedCall(
+        1000,
+        () => {
+          this.returnInput(this.correct);
+        },
+        [],
+        this
+      );
+    }
   }
 
   returnInput(value: number) {
-    if (settings.mode == "one") {
-      value = this.inputConfig.correct;
+    if (!this.waiting) {
+      return;
     }
-    this.scene.resume(this.inputConfig.caller, { choice: value });
-    this.scene.pause();
+    this.setSelected(value);
+    if (settings.mode == "one") {
+      value = this.correct;
+    }
+    this.callback(value);
+    this.waiting = false;
   }
 
   setSelected(choice: number) {
@@ -74,21 +62,6 @@ export class ControlScene extends Phaser.Scene {
     this.input.keyboard.on("keydown-RIGHT", (e: any) => {
       // pass response back to caller
       this.returnInput(1);
-    });
-    this.events.on("resume", (e: Phaser.Scene, d: InputConfig) => {
-      this.inputConfig = d;
-      this.scene.pause(d.caller);
-      if (settings.mode == "auto") {
-        this.time.delayedCall(
-          1000,
-          () => {
-            this.setSelected(this.inputConfig.correct);
-            this.returnInput(this.inputConfig.correct);
-          },
-          [],
-          this
-        );
-      }
     });
     document
       .getElementById("left")

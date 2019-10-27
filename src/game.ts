@@ -4,20 +4,18 @@ import settings from "./settings";
 
 export class GameScene extends SwitchBase {
   public msg: Phaser.GameObjects.Text;
-  public elapsed: number = 0;
-  public previous: number = 0; // previous elapsed
-  public period: number = 2; // time per cycle
+  public period: number = 2000; // time per cycle
   public alien: Phaser.GameObjects.Sprite;
-  public moveLeft: Phaser.Tweens.Tween;
-  public moveRight: Phaser.Tweens.Tween;
+  public attack: Phaser.Tweens.Tween;
   public asteroid: Phaser.GameObjects.Sprite;
   public target: Phaser.GameObjects.Sprite; // alien or asteroid
   public rocket: Phaser.GameObjects.Sprite;
+  public moveLeft: Phaser.Tweens.Tween;
+  public moveRight: Phaser.Tweens.Tween;
   public particles: Phaser.GameObjects.Particles.ParticleEmitterManager;
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
   public canvas = document.querySelector("canvas");
   public lane = 0;
-  public rocket_lane = 1;
   public rocket_y = 0;
   public sign = 1;
   public freq = 1.5;
@@ -58,6 +56,7 @@ export class GameScene extends SwitchBase {
   }
 
   create(): void {
+    super.create();
     console.log("create game");
     this.scoreDisplay = this.add.text(20, 20, "0", { fontSize: 20 });
     this.rocket_y = this.canvas.height * 0.9;
@@ -70,7 +69,7 @@ export class GameScene extends SwitchBase {
           start: i * 4,
           end: i * 4 + 3
         }),
-        frameRate: 2,
+        frameRate: 10,
         repeat: -1
       });
       this.alien.anims.load(name);
@@ -151,7 +150,6 @@ export class GameScene extends SwitchBase {
 
   reset() {
     const w = this.canvas.width;
-    this.elapsed = 0;
     this.lane = Phaser.Math.Between(0, 1);
     this.sign = 2 * Phaser.Math.Between(0, 1) - 1;
     this.freq = 0.5 + Math.random() * 2;
@@ -170,50 +168,51 @@ export class GameScene extends SwitchBase {
       this.alien.y = -100;
       if (this.alienSound) this.alienSound.stop();
     }
+    this.target.y = 0;
+    this.attack = this.tweens.add({
+      key: "attack",
+      targets: this.target,
+      y: this.canvas.height,
+      onUpdate: (
+        tween: Phaser.Tweens.Tween,
+        target: Phaser.GameObjects.Sprite
+      ) => {
+        const u = target.y / this.canvas.height;
+        const goal_x = this.canvas.width * (1 / 4 + this.lane / 2);
+        const wiggle =
+          this.canvas.width *
+          (1 / 2 +
+            (Math.min(10, this.score) / 20) *
+              (this.sign * Math.sin(2 * Math.PI * this.freq * u)));
+        const v = Math.min(1, (this.canvas.height / this.rocket_y) * u);
+        target.x = (1 - v) * wiggle + v * goal_x;
+        if (this.alienSound) this.alienSound.setVolume(u);
+      },
+      onComplete: () => this.reset(),
+      duration: this.period
+    });
     this.target.setVisible(true);
     this.collider.active = true;
-  }
-
-  update(time: number, delta: number) {
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-    this.previous = this.elapsed;
-    this.elapsed += delta * 0.001;
-    // update when the period is exceeded
-    if (this.elapsed > this.period) {
-      this.reset();
-    }
-    // pause when we pass the decision time
-    const decision_time = this.period * 0.5;
-    if (this.previous < decision_time && this.elapsed >= decision_time) {
-      this.getUserInput(
-        this.target === this.alien ? this.lane : 1 - this.lane,
-        // (v: number) => (this.rocket_lane = v)
-        (v: number) => {
-          const rocket_x = w / 4 + (v * w) / 2;
-          if (this.rocket.x < rocket_x) {
-            this.moveRight.play();
-          } else if (this.rocket.x > rocket_x) {
-            this.moveLeft.play();
+    this.time.delayedCall(
+      this.period / 2,
+      () => {
+        this.attack.pause();
+        this.getUserInput(
+          this.target === this.alien ? this.lane : 1 - this.lane,
+          (v: number) => {
+            this.attack.resume();
+            const rocket_x = w / 4 + (v * w) / 2;
+            if (this.rocket.x < rocket_x) {
+              this.moveRight.play();
+            } else if (this.rocket.x > rocket_x) {
+              this.moveLeft.play();
+            }
           }
-        }
-      );
-    }
-    const u = this.elapsed / this.period;
-    const goal_x = w / 4 + (this.lane * w) / 2;
-    const wiggle =
-      w / 2 +
-      ((Math.min(10, this.score) * w) / 20) *
-        (this.sign * Math.sin(2 * Math.PI * this.freq * u));
-    const v = Math.min(1, (h / this.rocket_y) * u);
-    this.target.x = (1 - v) * wiggle + v * goal_x;
-    this.target.y = this.canvas.height * u;
-
-    if (this.alienSound) this.alienSound.setVolume(u);
-
-    if (u % 0.2 < 1 / 60) {
-      // this.alien.setTint(0xffffff * Math.random());
-    }
+        );
+      },
+      [],
+      this
+    );
   }
 
   rocketCollideWithAlien() {
