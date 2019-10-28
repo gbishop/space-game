@@ -2,20 +2,21 @@ import "phaser";
 import { SwitchBase } from "./base";
 import settings from "./settings";
 
+// time for the attack
+const period = 2000;
+// height of the rocket
+const rocketYFraction = 0.9;
+
 export class GameScene extends SwitchBase {
   public msg: Phaser.GameObjects.Text;
-  public period: number = 2000; // time per cycle
   public alien: Phaser.GameObjects.Sprite;
   public attack: Phaser.Tweens.Tween;
   public asteroid: Phaser.GameObjects.Sprite;
   public target: Phaser.GameObjects.Sprite; // alien or asteroid
   public rocket: Phaser.GameObjects.Sprite;
-  public moveLeft: Phaser.Tweens.Tween;
-  public moveRight: Phaser.Tweens.Tween;
   public particles: Phaser.GameObjects.Particles.ParticleEmitterManager;
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
   public canvas = document.querySelector("canvas");
-  public rocket_y = 0;
   public score: number = 0;
   public scoreDisplay: Phaser.GameObjects.Text;
   public collider: Phaser.Physics.Arcade.Collider;
@@ -55,7 +56,7 @@ export class GameScene extends SwitchBase {
     super.create();
 
     // moving stars to give a sense of motion
-    const starPeriod = 4 * this.period;
+    const starPeriod = 4 * period;
     for (let s = 0; s < 100; s++) {
       let star = this.add.graphics();
       star.fillStyle(0xffffff);
@@ -104,10 +105,9 @@ export class GameScene extends SwitchBase {
     this.asteroid.anims.play("spin");
 
     // rocket
-    this.rocket_y = this.canvas.height * 0.9;
     this.rocket = this.add.sprite(
       (3 * this.canvas.width) / 4,
-      this.rocket_y,
+      rocketYFraction * this.canvas.height,
       "rocket"
     );
     this.rocket.setScale(0.5);
@@ -190,7 +190,10 @@ export class GameScene extends SwitchBase {
         tween: Phaser.Tweens.Tween,
         target: Phaser.GameObjects.Sprite
       ) => {
-        const v = Math.min(1, target.y / this.rocket_y); // 0 to 1
+        const v = Math.min(
+          1,
+          target.y / (rocketYFraction * this.canvas.height)
+        ); // 0 to 1
         const goal_x = w * (1 / 4 + lane / 2); // x of the lane
         // a sine wave to wiggle the attacker
         const wiggle =
@@ -204,15 +207,17 @@ export class GameScene extends SwitchBase {
         if (this.alienSound) this.alienSound.setVolume(v);
       },
       onComplete: () => this.reset(), // reset when done
-      duration: this.period
+      duration: period
     });
     // make the attacker visible
     this.target.setVisible(true);
     // make sure we collide
     this.collider.active = true;
+    // position the rocket
+    this.rocket.y = rocketYFraction * this.canvas.height;
     // stop half way down so the user can input
     this.time.delayedCall(
-      this.period / 2,
+      period / 2,
       () => {
         // pause the attack
         this.attack.pause();
