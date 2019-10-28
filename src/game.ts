@@ -86,28 +86,6 @@ export class GameScene extends SwitchBase {
       "rocket"
     );
     this.rocket.setScale(0.5);
-    this.moveLeft = this.tweens.add({
-      targets: this.rocket,
-      props: {
-        x: { value: this.canvas.width / 4, duration: 500 },
-        rotation: {
-          value: -Math.PI / 2,
-          duration: 250,
-          yoyo: true,
-          repeat: 0,
-          ease: "Sine.easeInOut"
-        }
-      },
-      paused: true
-    });
-    this.moveRight = this.tweens.add({
-      targets: this.rocket,
-      props: {
-        x: { value: (3 * this.canvas.width) / 4, duration: 500 },
-        rotation: { value: Math.PI / 2, duration: 250, yoyo: true, repeat: 0 }
-      },
-      paused: true
-    });
 
     // Enable physics on rocket and alien sprites
     this.physics.world.enable([this.rocket, this.alien, this.asteroid]);
@@ -194,9 +172,9 @@ export class GameScene extends SwitchBase {
         target: Phaser.GameObjects.Sprite
       ) => {
         const u = target.y / this.canvas.height;
-        const goal_x = this.canvas.width * (1 / 4 + lane / 2);
+        const goal_x = w * (1 / 4 + lane / 2);
         const wiggle =
-          this.canvas.width *
+          w *
           (1 / 2 +
             (Math.min(10, this.score) / 20) *
               (sign * Math.sin(2 * Math.PI * freq * u)));
@@ -217,11 +195,27 @@ export class GameScene extends SwitchBase {
           this.target === this.alien ? lane : 1 - lane,
           (v: number) => {
             this.attack.resume();
-            const rocket_x = w / 4 + (v * w) / 2;
+            const rocket_x = w * (1 / 4 + v / 2);
             if (this.rocket.x < rocket_x) {
-              this.moveRight.play();
+              this.tweens.add({
+                targets: this.rocket,
+                props: {
+                  x: { value: (3 * w) / 4, duration: 500 },
+                  rotation: { value: Math.PI / 2, duration: 250, yoyo: true }
+                }
+              });
             } else if (this.rocket.x > rocket_x) {
-              this.moveLeft.play();
+              this.tweens.add({
+                targets: this.rocket,
+                props: {
+                  x: { value: w / 4, duration: 500 },
+                  rotation: {
+                    value: -Math.PI / 2,
+                    duration: 250,
+                    yoyo: true
+                  }
+                }
+              });
             }
           }
         );
