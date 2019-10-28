@@ -8,9 +8,9 @@ interface InputConfig {
 }
 
 export class SwitchBase extends Phaser.Scene {
-  public waiting: boolean = false;
-  public callback: (v: number) => void;
-  public correct: number;
+  public waiting: boolean = false; // true when waiting for input
+  public callback: (v: number) => void; // call with their answer
+  public correct: number; // the correct answer for auto play
 
   constructor(args: any) {
     super(args);
@@ -33,14 +33,19 @@ export class SwitchBase extends Phaser.Scene {
   }
 
   returnInput(value: number) {
+    // ignore if not waiting
     if (!this.waiting) {
       return;
     }
+    // display the choice
     this.setSelected(value);
+    // return the correct answer in one-switch mode
     if (settings.mode == "one") {
       value = this.correct;
     }
+    // return the answer through the callback
     this.callback(value);
+    // ignore input
     this.waiting = false;
   }
 
@@ -54,7 +59,7 @@ export class SwitchBase extends Phaser.Scene {
   }
 
   create(): void {
-    console.log("create control");
+    // bind left and right arrow for direct selection
     this.input.keyboard.on("keydown-LEFT", (e: any) => {
       // pass response back to caller
       this.returnInput(0);
@@ -63,12 +68,14 @@ export class SwitchBase extends Phaser.Scene {
       // pass response back to caller
       this.returnInput(1);
     });
+    // bind the buttons for direct selection
     document
       .getElementById("left")
       .addEventListener("click", e => this.returnInput(0));
     document
       .getElementById("right")
       .addEventListener("click", e => this.returnInput(1));
+    // bind space for 2-switch mover
     this.input.keyboard.on("keydown-SPACE", (e: any) => {
       const choices = document.querySelectorAll("button.choice");
       let selected = document.querySelector("button.selected");
@@ -79,6 +86,7 @@ export class SwitchBase extends Phaser.Scene {
       }
       choices[i].classList.add("selected");
     });
+    // bind enter for 2-switch chooser
     this.input.keyboard.on("keydown-ENTER", (e: any) => {
       const selected = <HTMLButtonElement>(
         document.querySelector("button.selected")
