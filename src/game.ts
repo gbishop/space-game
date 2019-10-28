@@ -130,6 +130,7 @@ export class GameScene extends SwitchBase {
       gravityY: 800,
       on: false
     });
+
     this.reset();
 
     if (settings.sound) {
@@ -142,6 +143,24 @@ export class GameScene extends SwitchBase {
       this.explodeSound = <Phaser.Sound.WebAudioSound>(
         this.sound.add("explodeSound")
       );
+    }
+
+    const starPeriod = 4 * this.period;
+    for (let s = 0; s < 100; s++) {
+      let star = this.add.graphics();
+      star.fillStyle(0xffffff);
+      star.fillPoint(Phaser.Math.Between(0, this.canvas.width), 0, 2);
+      this.tweens.add({
+        targets: star,
+        duration: starPeriod,
+        delay: Phaser.Math.Between(0, starPeriod),
+        repeat: -1,
+        repeatDelay: Phaser.Math.Between(100, 500),
+        y: this.canvas.height,
+        onRepeat: () => {
+          star.x = Phaser.Math.Between(0, this.canvas.width);
+        }
+      });
     }
   }
 
