@@ -43,7 +43,12 @@ export class GameScene extends SwitchBase {
       startFrame: 0,
       endFrame: 15
     });
-    this.load.image("rocket", "assets/rocket.png");
+    this.load.spritesheet("rocket", "assets/rocket-sheet.png", {
+      frameWidth: 110,
+      frameHeight: 246,
+      startFrame: 0,
+      endFrame: 2
+    });
     this.load.image("particle", "assets/particle.png");
     if (settings.sound) {
       this.load.audio("pop", "assets/success.mp3");
@@ -95,7 +100,7 @@ export class GameScene extends SwitchBase {
 
     // asteroid
     this.asteroid = this.add.sprite(0, 0, "asteroid");
-    let anim = this.anims.create({
+    this.anims.create({
       key: "spin",
       frames: this.anims.generateFrameNumbers("asteroid", {}),
       frameRate: 20,
@@ -111,6 +116,14 @@ export class GameScene extends SwitchBase {
       "rocket"
     );
     this.rocket.setScale(0.5);
+    this.anims.create({
+      key: "flicker",
+      frames: this.anims.generateFrameNumbers("rocket", {}),
+      frameRate: 15,
+      repeat: -1
+    });
+    this.rocket.anims.load("flicker");
+    this.rocket.anims.play("flicker");
 
     // Enable physics on rocket and alien sprites
     this.physics.world.enable([this.rocket, this.alien, this.asteroid]);
@@ -161,7 +174,7 @@ export class GameScene extends SwitchBase {
     // curvyness
     const freq = 0.5 + Math.random() * 2;
     // choose an alien ship or an asteroid
-    if (this.score < 20 || Math.random() > 0.2) {
+    if (this.score < 20 || Math.random() > Math.min(0.5, this.score / 200)) {
       this.target = this.alien;
       // choose a random ship from the sheet
       const name = `ship${Phaser.Math.Between(0, 9)}`;
@@ -233,18 +246,22 @@ export class GameScene extends SwitchBase {
               this.tweens.add({
                 targets: this.rocket,
                 props: {
-                  x: { value: (3 * w) / 4, duration: 500 },
-                  rotation: { value: Math.PI / 2, duration: 250, yoyo: true }
+                  x: { value: (3 * w) / 4, duration: period / 4 },
+                  rotation: {
+                    value: Math.PI / 2,
+                    duration: period / 8,
+                    yoyo: true
+                  }
                 }
               });
             } else if (this.rocket.x > rocket_x) {
               this.tweens.add({
                 targets: this.rocket,
                 props: {
-                  x: { value: w / 4, duration: 500 },
+                  x: { value: w / 4, duration: period / 4 },
                   rotation: {
                     value: -Math.PI / 2,
-                    duration: 250,
+                    duration: period / 8,
                     yoyo: true
                   }
                 }
@@ -266,7 +283,7 @@ export class GameScene extends SwitchBase {
     } else {
       if (this.explodeSound) this.explodeSound.play();
       this.cameras.main.flash(500, 255, 0, 0);
-      this.score -= 1;
+      this.score -= Math.floor(this.score / 10);
     }
     // Hide the target
     this.target.visible = false;
