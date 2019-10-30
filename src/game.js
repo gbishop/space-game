@@ -1,7 +1,4 @@
-/**
- * @typedef {import('phaser') Phaser
- */
-// import "phaser";
+/** @typedef {import('phaser')} Phaser */
 import { SwitchBase } from "./base.js";
 import settings from "./settings.js";
 
@@ -20,6 +17,9 @@ export class GameScene extends SwitchBase {
     this.popSound = null;
     this.alienSound = null;
     this.explodeSound = null;
+    // cast this once so I don't have to below
+    // shouldn't I be able to just assert this?
+    this.sound = /** @type {Phaser.Sound.WebAudioSoundManager} */ (super.sound);
   }
 
   preload() {

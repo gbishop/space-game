@@ -1,8 +1,7 @@
-/**
- * @typedef {import('phaser') Phaser
- */
+/** @typedef {import('phaser')} Phaser */
 import { GameScene } from "./game.js";
 import settings from "./settings.js";
+import { getInput, getInputAll } from "./helpers.js";
 
 const config = {
   title: "Space",
@@ -44,22 +43,23 @@ window.onload = () => {
     game = new MyGame(config);
   });
 
-  [...document.querySelectorAll("input[name=mode]")].map(
+  getInputAll("input[name=mode]").map(
     node => (node.checked = node.value == settings.mode)
   );
-  const soundInput = document.getElementById("sound");
+
+  const soundInput = getInput("sound");
   soundInput.checked = settings.sound;
-  const asteroidsInput = document.getElementById("asteroids");
+  const asteroidsInput = getInput("asteroids");
   asteroidsInput.checked = settings.asteroids;
 
   document.getElementById("settings").addEventListener("change", e => {
     console.log("change");
-    const modeInput = document.querySelector("input[name=mode]:checked");
+    const modeInput = getInput("input[name=mode]:checked");
     const mode = modeInput.value;
     settings.mode = mode;
-    const soundInput = document.getElementById("sound");
+    const soundInput = getInput("sound");
     settings.sound = soundInput.checked;
-    const asteroidsInput = document.getElementById("asteroids");
+    const asteroidsInput = getInput("asteroids");
     settings.asteroids = asteroidsInput.checked;
     settings.persist();
   });
