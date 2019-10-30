@@ -8,6 +8,17 @@ export class SwitchBase extends Phaser.Scene {
     this.waiting = false; // true when waiting for input
   }
 
+  /**
+   * callback for getUserInput
+   * @callback callbackWithInput
+   * @param {number} result
+   */
+
+  /**
+   * get input from the user
+   * @param {number} correct - the correct answer
+   * @param {callbackWithInput} func
+   */
   getUserInput(correct, func) {
     this.waiting = true;
     this.correct = correct;
@@ -24,6 +35,10 @@ export class SwitchBase extends Phaser.Scene {
     }
   }
 
+  /**
+   * return input to the user through the callback
+   * @param {number} value
+   */
   returnInput(value) {
     // ignore if not waiting
     if (!this.waiting) {
@@ -41,6 +56,10 @@ export class SwitchBase extends Phaser.Scene {
     this.waiting = false;
   }
 
+  /**
+   * highlight the selected button
+   * @param {number} choice
+   */
   setSelected(choice) {
     const choices = document.querySelectorAll("button.choice");
     let selected = document.querySelector("button.selected");
