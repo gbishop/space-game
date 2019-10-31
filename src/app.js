@@ -1,8 +1,9 @@
-import "phaser";
-import { GameScene } from "./game";
-import settings from "./settings";
+/** @typedef {import('phaser')} Phaser */
+import { GameScene } from "./game.js";
+import settings from "./settings.js";
+import { getInput, getInputAll } from "./helpers.js";
 
-const config: Phaser.Types.Core.GameConfig = {
+const config = {
   title: "Space",
   type: Phaser.AUTO,
   width: 600,
@@ -23,13 +24,13 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 export class MyGame extends Phaser.Game {
-  constructor(config: Phaser.Types.Core.GameConfig) {
+  constructor(config) {
     super(config);
   }
 }
 
 window.onload = () => {
-  let game: Phaser.Game = null;
+  let game = null;
   document.getElementById("setup").addEventListener("click", () => {
     if (game) {
       game.destroy(true);
@@ -42,26 +43,21 @@ window.onload = () => {
     game = new MyGame(config);
   });
 
-  [...document.querySelectorAll("input[name=mode]")].map(
-    (node: HTMLInputElement) => (node.checked = node.value == settings.mode)
+  getInputAll("input[name=mode]").map(
+    node => (node.checked = node.value == settings.mode)
   );
-  const soundInput = <HTMLInputElement>document.getElementById("sound");
+
+  const soundInput = getInput("#sound");
   soundInput.checked = settings.sound;
-  const asteroidsInput = <HTMLInputElement>document.getElementById("asteroids");
+  const asteroidsInput = getInput("#asteroids");
   asteroidsInput.checked = settings.asteroids;
 
   document.getElementById("settings").addEventListener("change", e => {
     console.log("change");
-    const modeInput = <HTMLInputElement>(
-      document.querySelector("input[name=mode]:checked")
-    );
+    const modeInput = getInput("input[name=mode]:checked");
     const mode = modeInput.value;
     settings.mode = mode;
-    const soundInput = <HTMLInputElement>document.getElementById("sound");
     settings.sound = soundInput.checked;
-    const asteroidsInput = <HTMLInputElement>(
-      document.getElementById("asteroids")
-    );
     settings.asteroids = asteroidsInput.checked;
     settings.persist();
   });

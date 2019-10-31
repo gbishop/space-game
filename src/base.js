@@ -1,22 +1,25 @@
-import "phaser";
-import settings from "./settings";
-
-interface InputConfig {
-  caller: string;
-  choices: string[];
-  correct: number;
-}
+/** @typedef {import('phaser')} Phaser */
+import settings from "./settings.js";
+import { getInput } from "./helpers.js";
 
 export class SwitchBase extends Phaser.Scene {
-  public waiting: boolean = false; // true when waiting for input
-  public callback: (v: number) => void; // call with their answer
-  public correct: number; // the correct answer for auto play
-
-  constructor(args: any) {
+  constructor(args) {
     super(args);
+    this.waiting = false; // true when waiting for input
   }
 
-  getUserInput(correct: number, func: (v: number) => void) {
+  /**
+   * callback for getUserInput
+   * @callback callbackWithInput
+   * @param {number} result
+   */
+
+  /**
+   * get input from the user
+   * @param {number} correct - the correct answer
+   * @param {callbackWithInput} func
+   */
+  getUserInput(correct, func) {
     this.waiting = true;
     this.correct = correct;
     this.callback = func;
@@ -32,7 +35,11 @@ export class SwitchBase extends Phaser.Scene {
     }
   }
 
-  returnInput(value: number) {
+  /**
+   * return input to the user through the callback
+   * @param {number} value
+   */
+  returnInput(value) {
     // ignore if not waiting
     if (!this.waiting) {
       return;
@@ -49,22 +56,33 @@ export class SwitchBase extends Phaser.Scene {
     this.waiting = false;
   }
 
-  setSelected(choice: number) {
+  /**
+   * highlight the selected button
+   * @param {number} choice
+   */
+  setSelected(choice) {
+    this.clearSelected();
     const choices = document.querySelectorAll("button.choice");
-    let selected = document.querySelector("button.selected");
-    if (selected) {
-      selected.classList.remove("selected");
-    }
     choices[choice].classList.add("selected");
   }
 
-  create(): void {
+  /** 
+   * clear the highlight from the button
+   */
+  clearSelected() {
+    const selected = document.querySelector("button.selected");
+    if (selected) {
+      selected.classList.remove("selected");
+    }
+  }
+
+  create() {
     // bind left and right arrow for direct selection
-    this.input.keyboard.on("keydown-LEFT", (e: any) => {
+    this.input.keyboard.on("keydown-LEFT", e => {
       // pass response back to caller
       this.returnInput(0);
     });
-    this.input.keyboard.on("keydown-RIGHT", (e: any) => {
+    this.input.keyboard.on("keydown-RIGHT", e => {
       // pass response back to caller
       this.returnInput(1);
     });
@@ -76,7 +94,7 @@ export class SwitchBase extends Phaser.Scene {
       .getElementById("right")
       .addEventListener("click", e => this.returnInput(1));
     // bind space for 2-switch mover
-    this.input.keyboard.on("keydown-SPACE", (e: any) => {
+    this.input.keyboard.on("keydown-SPACE", e => {
       const choices = document.querySelectorAll("button.choice");
       let selected = document.querySelector("button.selected");
       let i = 0;
@@ -87,10 +105,8 @@ export class SwitchBase extends Phaser.Scene {
       choices[i].classList.add("selected");
     });
     // bind enter for 2-switch chooser
-    this.input.keyboard.on("keydown-ENTER", (e: any) => {
-      const selected = <HTMLButtonElement>(
-        document.querySelector("button.selected")
-      );
+    this.input.keyboard.on("keydown-ENTER", e => {
+      const selected = getInput("button.selected");
       if (selected) {
         selected.click();
       }
