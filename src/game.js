@@ -212,6 +212,18 @@ export class GameScene extends SwitchBase {
     // make sure we collide
     this.collider.active = true;
     // position the rocket
+    this.tweens.add({
+      targets: this.rocket,
+      props: {
+        x: { value: w / 2, duration: period / 4 },
+        rotation: {
+          value: (Math.sign(w / 2 - this.rocket.x) * Math.PI) / 4,
+          duration: period / 8,
+          yoyo: true
+        },
+        y: { value: rocketYFraction * this.canvas.height }
+      }
+    });
     this.rocket.y = rocketYFraction * this.canvas.height;
     // stop half way down so the user can input
     this.time.delayedCall(
@@ -233,7 +245,7 @@ export class GameScene extends SwitchBase {
                 props: {
                   x: { value: (3 * w) / 4, duration: period / 4 },
                   rotation: {
-                    value: Math.PI / 2,
+                    value: Math.PI / 4,
                     duration: period / 8,
                     yoyo: true
                   }
