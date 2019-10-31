@@ -267,7 +267,7 @@ export class GameScene extends SwitchBase {
                 props: {
                   x: { value: w / 4, duration: period / 4 },
                   rotation: {
-                    value: -Math.PI / 2,
+                    value: -Math.PI / 4,
                     duration: period / 8,
                     yoyo: true
                   }
