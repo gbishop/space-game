@@ -75,7 +75,7 @@ export class GameScene extends SwitchBase {
     this.scoreDisplay = this.add.text(20, 20, "0", { fontSize: 20 });
 
     // alien ships
-    this.alien = this.add.sprite(this.canvas.width / 2, 10, "alien");
+    this.alien = this.add.sprite(this.canvas.width / 2, -20, "alien");
     for (let i = 0; i < 10; i++) {
       let name = `ship${i}`;
       let a = this.anims.create({
@@ -91,7 +91,7 @@ export class GameScene extends SwitchBase {
     }
 
     // asteroid
-    this.asteroid = this.add.sprite(0, 0, "asteroid");
+    this.asteroid = this.add.sprite(this.canvas.width / 2, -20, "asteroid");
     this.anims.create({
       key: "spin",
       frames: this.anims.generateFrameNumbers("asteroid", {}),
@@ -148,12 +148,32 @@ export class GameScene extends SwitchBase {
       this.popSound = this.sound.add("pop");
       this.alienSound = this.sound.add("alienSound");
       this.alienSound.setLoop(true);
-      this.alienSound.play();
       this.explodeSound = this.sound.add("explodeSound");
     }
   }
 
   reset() {
+    this.clearSelected();
+
+    const w = this.canvas.width;
+
+    // reposition the rocket
+    this.tweens.add({
+      targets: this.rocket,
+      props: {
+        x: { value: w / 2, duration: period / 4 },
+        rotation: {
+          value: (Math.sign(w / 2 - this.rocket.x) * Math.PI) / 4,
+          duration: period / 8,
+          yoyo: true
+        },
+        y: { value: rocketYFraction * this.canvas.height }
+      },
+      onComplete: () => this.beginAttack()
+    });
+  }
+
+  beginAttack() {
     const w = this.canvas.width;
     // choose the next correct answer
     const lane = Phaser.Math.Between(0, 1);
@@ -172,6 +192,7 @@ export class GameScene extends SwitchBase {
       if (this.alienSound) {
         this.alienSound.setSeek(0);
         this.alienSound.setRate(freq);
+        this.alienSound.setVolume(0);
         this.alienSound.play();
       }
     } else {
@@ -181,7 +202,7 @@ export class GameScene extends SwitchBase {
       if (this.alienSound) this.alienSound.stop();
     }
     // start at the top
-    this.target.y = 0;
+    this.target.y = -20;
     // construct the objects path
     this.attack = this.tweens.add({
       key: "attack",
@@ -204,27 +225,16 @@ export class GameScene extends SwitchBase {
         // adjust the volume
         if (this.alienSound) this.alienSound.setVolume(v);
       },
-      onComplete: () => this.reset(),
+      onComplete: () => {
+        this.target.setVisible(false);
+        this.reset();
+      },
       duration: period
     });
     // make the attacker visible
     this.target.setVisible(true);
     // make sure we collide
     this.collider.active = true;
-    // position the rocket
-    this.tweens.add({
-      targets: this.rocket,
-      props: {
-        x: { value: w / 2, duration: period / 4 },
-        rotation: {
-          value: (Math.sign(w / 2 - this.rocket.x) * Math.PI) / 4,
-          duration: period / 8,
-          yoyo: true
-        },
-        y: { value: rocketYFraction * this.canvas.height }
-      }
-    });
-    this.rocket.y = rocketYFraction * this.canvas.height;
     // stop half way down so the user can input
     this.time.delayedCall(
       period / 2,
@@ -273,6 +283,7 @@ export class GameScene extends SwitchBase {
   }
 
   rocketCollideWithAlien() {
+    this.alienSound.stop();
     if (this.target == this.alien) {
       if (this.popSound) this.popSound.play();
       this.cameras.main.flash();
