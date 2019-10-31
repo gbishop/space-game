@@ -61,12 +61,19 @@ export class SwitchBase extends Phaser.Scene {
    * @param {number} choice
    */
   setSelected(choice) {
+    this.clearSelected();
     const choices = document.querySelectorAll("button.choice");
-    let selected = document.querySelector("button.selected");
+    choices[choice].classList.add("selected");
+  }
+
+  /** 
+   * clear the highlight from the button
+   */
+  clearSelected() {
+    const selected = document.querySelector("button.selected");
     if (selected) {
       selected.classList.remove("selected");
     }
-    choices[choice].classList.add("selected");
   }
 
   create() {
