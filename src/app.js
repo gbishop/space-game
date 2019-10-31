@@ -47,9 +47,9 @@ window.onload = () => {
     node => (node.checked = node.value == settings.mode)
   );
 
-  const soundInput = getInput("sound");
+  const soundInput = getInput("#sound");
   soundInput.checked = settings.sound;
-  const asteroidsInput = getInput("asteroids");
+  const asteroidsInput = getInput("#asteroids");
   asteroidsInput.checked = settings.asteroids;
 
   document.getElementById("settings").addEventListener("change", e => {
@@ -57,9 +57,7 @@ window.onload = () => {
     const modeInput = getInput("input[name=mode]:checked");
     const mode = modeInput.value;
     settings.mode = mode;
-    const soundInput = getInput("sound");
     settings.sound = soundInput.checked;
-    const asteroidsInput = getInput("asteroids");
     settings.asteroids = asteroidsInput.checked;
     settings.persist();
   });
